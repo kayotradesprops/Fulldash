@@ -1,0 +1,390 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Tracker</title>
+<style>
+:root{--bg:#0b0e12;--p:#11161d;--p2:#171e27;--line:#293441;--txt:#f4f7f9;--muted:#8d99a8;--a:#d7ff64;--g:#55d68b;--r:#ff6b72;--y:#f5c451;--journalTextSize:15px;--journalTextColor:#f4f7f9;--journalTextAlign:left;--journalTextWeight:400;--journalTextStyle:normal;--site-font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--site-font)}button,input,select,textarea{font:inherit}.app{max-width:1450px;margin:auto;padding:20px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.title{font-size:36px;font-weight:850}.sub{color:var(--muted);font-size:13px}.card{background:var(--p);border:1px solid var(--line);border-radius:18px}.dash{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.stack{display:grid;gap:16px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px}.stat{background:var(--p2);border:1px solid var(--line);border-radius:13px;padding:13px}.k{color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:800}.v{font-size:24px;font-weight:850;margin-top:5px}.section{padding:15px}.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.h{font-weight:800}.piegrid{display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:center}.pie{width:210px;height:210px;border-radius:50%;position:relative}.pie:after{content:"";position:absolute;inset:42px;background:var(--p2);border-radius:50%;border:1px solid var(--line)}.pc{position:absolute;inset:0;z-index:2;display:grid;place-items:center;text-align:center}.pc strong{font-size:28px}.legend{display:grid;gap:9px}.lr{display:flex;justify-content:space-between;background:var(--p2);border:1px solid var(--line);border-radius:11px;padding:10px}.week,.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.week{font-size:10px;color:var(--muted);text-align:center}.day{aspect-ratio:1;border:1px solid transparent;background:transparent;color:var(--txt);border-radius:10px;position:relative}.day:hover{background:var(--p2)}.day.out{color:#4d5865}.day.today{border-color:#5a6674}.day.has:after{content:"";position:absolute;width:5px;height:5px;background:#6ea8ff;border-radius:50%;bottom:4px;left:50%}.recent{display:grid;gap:8px}.row{display:grid;grid-template-columns:90px 70px 80px 80px 1fr auto;gap:10px;background:var(--p2);border:1px solid var(--line);padding:10px;border-radius:11px;font-size:12px}.badge{padding:4px 7px;border-radius:999px;font-weight:800}.win{color:var(--g)}.loss{color:var(--r)}.be{color:var(--y)}.btn{border:0;background:var(--a);color:#0a0d08;padding:10px 13px;border-radius:10px;font-weight:850}.btn2{border:1px solid var(--line);background:var(--p2);color:var(--txt);padding:9px 12px;border-radius:10px}.drawer{display:none;min-height:100vh;background:var(--bg);padding:20px}.drawer.open{display:block}.panel{max-width:1450px;margin:0 auto;background:var(--bg);padding:0}.dhead{display:flex;justify-content:space-between;align-items:center}.date{font-size:24px;font-weight:850}.trade{background:var(--p);border:1px solid var(--line);border-radius:15px;padding:14px;margin-top:12px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.f label{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;background:var(--p2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;outline:none}textarea{min-height:100px;resize:vertical}.tags{display:flex;flex-wrap:wrap;gap:7px}.tag{border:1px solid var(--line);background:#1c2530;color:var(--muted);padding:7px 9px;border-radius:999px;font-size:11px}.tag.on{background:var(--a);color:#0a0d08;border-color:var(--a)}.sep{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}.shots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.shot{min-height:135px;border:1px dashed #3b4755;border-radius:11px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}.shot label{cursor:pointer;text-align:center;color:var(--muted);font-size:11px}.shot input{display:none}.shot img{width:100%;height:135px;object-fit:cover}.x{position:absolute;right:6px;top:6px;background:#000b;color:white;border:1px solid #ffffff33;border-radius:7px}.danger{background:#ff6b7214;border:1px solid #ff6b7255;color:#ff9095;border-radius:9px;padding:7px 9px}@media(max-width:1000px){.dash{grid-template-columns:1fr}.shots{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.piegrid{grid-template-columns:1fr}.piegrid>div:first-child{width:210px;margin:0 auto}.pie{margin:0 auto}.pc{width:210px;right:auto}.legend{width:100%}.g4,.g3,.g2{grid-template-columns:1fr}.shots{grid-template-columns:1fr}.row{grid-template-columns:repeat(3,1fr)}}
+.app.hidden{display:none}.journal-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}.journal-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.journal-actions{display:flex;gap:8px;align-items:center}
+
+.auth-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:radial-gradient(circle at top right,rgba(215,255,100,.08),transparent 32%),var(--bg);
+}
+.auth-card{
+  width:min(440px,100%);background:var(--p);border:1px solid var(--line);
+  border-radius:20px;padding:24px;box-shadow:0 28px 90px rgba(0,0,0,.35)
+}
+.auth-card h1{margin:0;font-size:30px;letter-spacing:-1px}
+.auth-card p{color:var(--muted);font-size:13px;line-height:1.5}
+.auth-fields{display:grid;gap:10px;margin-top:18px}
+.auth-fields input{
+  width:100%;background:var(--p2);border:1px solid var(--line);color:var(--txt);
+  border-radius:11px;padding:11px 12px;outline:none
+}
+.auth-actions{display:grid;gap:8px;margin-top:12px}
+.auth-primary{border:0;background:var(--a);color:#0b0e08;padding:11px;border-radius:11px;font-weight:850}
+.auth-secondary{border:1px solid var(--line);background:var(--p2);color:var(--txt);padding:10px;border-radius:11px;font-weight:750}
+.auth-link{border:0;background:transparent;color:var(--muted);padding:7px}
+.auth-message{min-height:18px;color:var(--muted);font-size:12px;margin-top:10px}
+.auth-message.error{color:#ff8585}.auth-message.ok{color:var(--a)}
+.user-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.user-label{color:var(--muted);font-size:11px}
+.logout-btn{border:1px solid var(--line);background:var(--p2);color:var(--txt);padding:8px 10px;border-radius:10px}
+.hidden{display:none!important}
+
+.user-controls #userLabel,.user-controls .logout-btn{display:none!important}
+
+/* Appearance typography applies to journal writing; B/I/U are per-selection inside rich editors. */
+input[data-k],.rich-editor{font-size:var(--journalTextSize)!important;color:var(--journalTextColor)!important;text-align:var(--journalTextAlign)!important}
+.rich-wrap{width:100%}.rich-toolbar{display:flex;align-items:center;gap:6px;margin-bottom:6px}.rich-toolbar button{width:30px;height:28px;border:1px solid var(--line);background:var(--p2);color:var(--txt);border-radius:8px;padding:0}.rich-toolbar button:hover{border-color:#4b5867}.rich-toolbar span{font-size:10px;color:var(--muted);margin-left:3px}.rich-editor{width:100%;background:var(--p2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;outline:none;min-height:100px;line-height:1.5;overflow:auto;white-space:pre-wrap}.rich-editor:focus{border-color:#4b5867}.rich-editor:empty:before{content:attr(data-placeholder);color:#687482;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="k">Private trading workspace</div>
+    <h1 id="authHeading">Welcome Back, Trader</h1>
+    <p id="authSub">Sign in to open your private journal on this device.</p>
+    <div class="auth-fields">
+      <input id="authName" type="text" placeholder="Display name" class="hidden" autocomplete="name">
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <input id="authNewPassword" type="password" placeholder="New password" class="hidden" autocomplete="new-password">
+    </div>
+    <div class="auth-actions">
+      <button id="authSubmit" class="auth-primary">Sign In</button>
+      <button id="authToggle" class="auth-secondary">Create an account</button>
+      <button id="authForgot" class="auth-link">Forgot password?</button>
+    </div>
+    <div id="authMessage" class="auth-message"></div>
+  </div>
+</div>
+
+<div class="app">
+<div class="top"><div><div class="title">Trade Tracker</div><div class="sub">Execution • P&L • confluences • invalidations • psychology</div></div><div class="user-controls"><span id="userLabel" class="user-label"></span><div id="save" class="sub">Saved</div><button id="logoutBtn" class="logout-btn">Log out</button></div></div>
+<div class="dash">
+<div class="stack">
+<div class="card stats">
+<div class="stat"><div class="k">Total Trades</div><div class="v" id="st">0</div></div>
+<div class="stat"><div class="k">Win Rate</div><div class="v" id="wr">0%</div></div>
+<div class="stat"><div class="k">Net P&L</div><div class="v" id="np">$0</div></div>
+<div class="stat"><div class="k">Avg / Trade</div><div class="v" id="av">$0</div></div>
+</div>
+<div class="card section"><div class="head"><div class="h">Wins / Losses / Break Evens</div></div>
+<div class="piegrid"><div style="position:relative"><div id="pie" class="pie"></div><div class="pc"><div><strong id="pt">0</strong><div class="sub">trades</div></div></div></div>
+<div class="legend"><div class="lr"><span class="win">Wins</span><b id="wc">0</b></div><div class="lr"><span class="loss">Losses</span><b id="lc">0</b></div><div class="lr"><span class="be">Break Evens</span><b id="bc">0</b></div></div></div></div>
+<div class="card section"><div class="head"><div class="h">Recent Trades</div></div><div id="recent" class="recent"></div></div>
+</div>
+<div class="stack">
+<div class="card section"><div class="head"><button class="btn2" id="prev">←</button><div class="h" id="ct"></div><button class="btn2" id="next">→</button></div>
+<div class="week"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="cal" id="cal"></div>
+<div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center"><span class="sub">Click a date to open all trades.</span><button class="btn2" id="today">Today</button></div></div>
+<div class="card section"><div class="head"><div class="h">Quick Log</div></div><button class="btn" id="quick">+ Add Trade Today</button></div>
+</div></div></div>
+
+<div class="drawer" id="drawer"><div class="panel">
+<div class="journal-topbar">
+  <div>
+    <div class="sub">Trade Journal</div>
+    <div class="date" id="dd"></div>
+  </div>
+  <div class="journal-actions">
+    <button class="btn2" id="close">← Back to Dashboard</button>
+    <button class="btn" id="add">+ Add Trade</button>
+  </div>
+</div>
+<div id="trades"></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+function applyWorkspaceTheme(p={}){
+  const r=document.documentElement.style;
+  if(p.fontSize!=null)r.setProperty('--journalTextSize',p.fontSize+'px');
+  if(p.textColor)r.setProperty('--journalTextColor',p.textColor);
+  r.setProperty('--journalTextAlign',p.alignment||'left');
+  const fonts={inter:'Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif',arial:'Arial,Helvetica,sans-serif',verdana:'Verdana,Geneva,sans-serif',trebuchet:'"Trebuchet MS",Arial,sans-serif',georgia:'Georgia,"Times New Roman",serif',times:'"Times New Roman",Times,serif',courier:'"Courier New",Courier,monospace'};
+  r.setProperty('--site-font',fonts[p.siteFont]||fonts.inter);
+  /* Journal chrome/colors stay original. */
+}
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='workspace-theme')applyWorkspaceTheme(e.data.prefs||{})});
+try{parent.postMessage({type:'workspace-theme-ready'},location.origin)}catch{}
+
+
+const RICH_ALLOWED=new Set(['B','I','U','STRONG','EM','BR','DIV','P']);
+function sanitizeRichHTML(html){
+  const box=document.createElement('div');box.innerHTML=String(html||'');
+  const clean=node=>{for(const child of [...node.children]){clean(child);if(!RICH_ALLOWED.has(child.tagName)){child.replaceWith(...child.childNodes)}else{[...child.attributes].forEach(a=>child.removeAttribute(a.name))}}};
+  clean(box);return box.innerHTML;
+}
+function richHTMLFromStored(value){const s=String(value||'');if(!/<\/?(?:b|i|u|strong|em|br|div|p)\b/i.test(s)){const d=document.createElement('div');d.textContent=s;return d.innerHTML.replace(/\n/g,'<br>')}return sanitizeRichHTML(s)}
+function richEditorHTML(id,placeholder,value=''){return `<div class="rich-wrap"><div class="rich-toolbar" aria-label="Text formatting"><button type="button" data-rich-cmd="bold" title="Bold selected text"><b>B</b></button><button type="button" data-rich-cmd="italic" title="Italicize selected text"><i>I</i></button><button type="button" data-rich-cmd="underline" title="Underline selected text"><u>U</u></button><span>Select words, then format them.</span></div><div id="${id}" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="${placeholder.replace(/"/g,'&quot;')}">${richHTMLFromStored(value)}</div></div>`}
+function wireRichEditor(editor,onchange){
+  const wrap=editor.closest('.rich-wrap');
+  wrap.querySelectorAll('[data-rich-cmd]').forEach(btn=>{btn.addEventListener('mousedown',e=>e.preventDefault());btn.addEventListener('click',()=>{editor.focus();document.execCommand(btn.dataset.richCmd,false,null);onchange?.()})});
+  editor.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+  editor.addEventListener('input',()=>onchange?.());
+}
+function richValue(editor){if(!editor.textContent.trim())return '';return sanitizeRichHTML(editor.innerHTML).trim()}
+function setRichValue(editor,value){editor.innerHTML=richHTMLFromStored(value)}
+
+const SUPABASE_URL = 'https://fkxciwqjmubaqecljtba.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_mJn9UlaMNB_hk0hpAermdw_ykx54tba';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+});
+let activeUser = null;
+let authMode = "signin";
+
+function authMsg(message, kind=""){
+  const el=document.getElementById("authMessage");
+  el.textContent=message||"";
+  el.className="auth-message"+(kind?(" "+kind):"");
+}
+function setAuthMode(mode){
+  authMode=mode;
+  const signup=mode==="signup", recovery=mode==="recovery";
+  document.getElementById("authHeading").textContent=recovery?"Choose a New Password":signup?"Create Your Journal Account":"Welcome Back, Trader";
+  document.getElementById("authSub").textContent=recovery?"Set a new password for your trading journal.":signup?"Your analysis and trade journals will use the same private account.":"Sign in to open your private journal on this device.";
+  document.getElementById("authName").classList.toggle("hidden",!signup);
+  document.getElementById("authEmail").classList.toggle("hidden",recovery);
+  document.getElementById("authPassword").classList.toggle("hidden",recovery);
+  document.getElementById("authNewPassword").classList.toggle("hidden",!recovery);
+  document.getElementById("authSubmit").textContent=recovery?"Update Password":signup?"Create Account":"Sign In";
+  document.getElementById("authToggle").classList.toggle("hidden",recovery);
+  document.getElementById("authForgot").classList.toggle("hidden",signup||recovery);
+  document.getElementById("authToggle").textContent=signup?"I already have an account":"Create an account";
+  authMsg("");
+}
+function showAuth(){
+  document.getElementById("authScreen").classList.remove("hidden");
+  document.querySelector('.app').classList.add("hidden");
+}
+function showApp(user){
+  activeUser=user;
+  document.getElementById("authScreen").classList.add("hidden");
+  document.querySelector('.app').classList.remove("hidden");
+  const label=document.getElementById("userLabel");
+  if(label) label.textContent=user?.user_metadata?.display_name || user?.email || "Trader";
+}
+async function signOut(){
+  await sb.auth.signOut();
+  activeUser=null;
+  showAuth();
+}
+document.getElementById("authToggle").addEventListener("click",()=>setAuthMode(authMode==="signup"?"signin":"signup"));
+document.getElementById("authForgot").addEventListener("click",async()=>{
+  const email=document.getElementById("authEmail").value.trim();
+  if(!email) return authMsg("Enter your email first.","error");
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+  if(error) return authMsg(error.message,"error");
+  authMsg("Password reset email sent.","ok");
+});
+document.getElementById("authSubmit").addEventListener("click",async()=>{
+  authMsg("Working…");
+  if(authMode==="recovery"){
+    const password=document.getElementById("authNewPassword").value;
+    if(password.length<6) return authMsg("Use at least 6 characters.","error");
+    const {error}=await sb.auth.updateUser({password});
+    if(error) return authMsg(error.message,"error");
+    authMsg("Password updated. Opening journal…","ok");
+    const {data}=await sb.auth.getUser();
+    showApp(data.user);
+    await initTrades();
+    return;
+  }
+  const email=document.getElementById("authEmail").value.trim();
+  const password=document.getElementById("authPassword").value;
+  if(!email||!password) return authMsg("Enter your email and password.","error");
+  if(authMode==="signup"){
+    const name=document.getElementById("authName").value.trim();
+    if(!name) return authMsg("Enter a display name.","error");
+    const {data,error}=await sb.auth.signUp({
+      email,password,
+      options:{data:{display_name:name},emailRedirectTo:location.origin}
+    });
+    if(error) return authMsg(error.message,"error");
+    if(!data.session) return authMsg("Account created. Check your email to confirm it, then sign in.","ok");
+    showApp(data.user); await initTrades(); return;
+  }
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error) return authMsg(error.message,"error");
+  showApp(data.user); await initTrades();
+});
+sb.auth.onAuthStateChange(async(event,session)=>{
+  if(event==="PASSWORD_RECOVERY"){showAuth();setAuthMode("recovery");return;}
+  if(event==="SIGNED_OUT"){showAuth();return;}
+});
+
+const TFS=["4H","1H","15M","5M","Entry"];
+const CONFS=["HTF Liquidity","LTF Liquidity Sweep","FVG","IFVG","Order Block","Breaker","Mitigation Block","SMT","Displacement","MSS / CISD","Premium / Discount","OTE","NDOG / NWOG","Session High / Low","Previous Day High / Low","Previous Week High / Low","Agreed DOL","IRL → ERL","ERL → IRL","ATM Logic","Silver Bullet","First Presented FVG","Reflection FVG","PO3","HTF Open Manipulation","Low Resistance Liquidity","Institutional Order Flow"];
+const INVS=["HTF Bias Invalidated","Liquidity Already Taken","No Displacement","No MSS / CISD","Poor R:R","Wrong Session / Time","News Risk","Entered Before Confirmation","HTF PD Array Failed","Opposing Liquidity Too Close","SMT Failed","DOL Changed","Range / Chop","Overextended Move","Late Entry","No Clear Draw on Liquidity","Setup Outside Model","Stop Placement Invalid","Other"];
+const MODELS=["","ATM","Silver Bullet","First Presented FVG","Reaper","OTE","Liquidity Sweep + MSS","Discretionary","Other"];
+let sel=iso(new Date()),cur=new Date(),timer,currentDay=null;
+const $=x=>document.getElementById(x);
+function iso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function fromISO(s){let[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)}
+function cash(n){n=+n||0;return `${n<0?"-":""}$${Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:2})}`}
+function blank(d){return{date:d,trades:[]}}
+function nt(){return{id:crypto.randomUUID(),ticker:"NQ",direction:"Long",entry:"",sl:"",tp:"",pnl:"",result:"",account:"Eval",session:"NY AM",model:"",customModel:"",confluences:[],invalidations:[],psychology:"",notes:"",charts:{},createdAt:new Date().toISOString()}}
+function safe(v){return String(v).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}
+function rowToTrade(r){return{id:r.id,ticker:r.instrument||"",direction:r.direction||"Long",entry:r.entry??"",sl:r.stop_loss??"",tp:r.take_profit??"",pnl:r.pnl??"",result:r.result||"",account:r.account_type||"Eval",session:r.session||"NY AM",model:r.model||"",customModel:r.custom_model||"",confluences:r.confluences||[],invalidations:r.invalidations||[],psychology:r.psychology_before||"",notes:r.notes||"",charts:r.chart_paths||{},createdAt:r.created_at}}
+function tradeToRow(t,date){return{id:t.id,user_id:activeUser.id,trade_date:date,instrument:t.ticker||null,direction:t.direction||null,entry:t.entry===""?null:Number(t.entry),stop_loss:t.sl===""?null:Number(t.sl),take_profit:t.tp===""?null:Number(t.tp),pnl:t.pnl===""?null:Number(t.pnl),result:t.result||null,account_type:t.account||null,session:t.session||null,model:t.model||null,custom_model:t.customModel||null,confluences:t.confluences||[],invalidations:t.invalidations||[],psychology_before:t.psychology||null,psychology_during:null,psychology_after:null,confidence:null,discipline:null,notes:t.notes||null,chart_paths:t.charts||{},updated_at:new Date().toISOString()}}
+async function get(d){
+  const {data,error}=await sb.from("trades").select("*").eq("trade_date",d).order("created_at",{ascending:true});
+  if(error)throw error;return{date:d,trades:(data||[]).map(rowToTrade)}
+}
+async function all(){
+  const {data,error}=await sb.from("trades").select("*").order("trade_date",{ascending:true}).order("created_at",{ascending:true});
+  if(error)throw error;
+  const m=new Map();for(const r of data||[]){if(!m.has(r.trade_date))m.set(r.trade_date,blank(r.trade_date));m.get(r.trade_date).trades.push(rowToTrade(r))}
+  return [...m.values()];
+}
+async function save(day){
+  $("save").textContent="Saving…";
+  if(day.trades.length){
+    const {error}=await sb.from("trades").upsert(day.trades.map(x=>tradeToRow(x,day.date)),{onConflict:"id"});
+    if(error){console.error(error);$("save").textContent="Save error";return}
+  }
+  $("save").textContent="Saved";currentDay=day;await dash();
+}
+async function delTrade(t){
+  const paths=Object.values(t.charts||{}).filter(Boolean);if(paths.length)await sb.storage.from("journal-images").remove(paths);
+  const {error}=await sb.from("trades").delete().eq("id",t.id);if(error)throw error;
+}
+const localShotPreviews=new Map();
+async function signed(path){
+  if(!path)return null;
+  if(localShotPreviews.has(path))return localShotPreviews.get(path);
+  const bucket=sb.storage.from("journal-images");
+  const {data,error}=await bucket.createSignedUrl(path,3600);
+  if(!error&&data?.signedUrl)return data.signedUrl;
+  const {data:blob,error:downloadError}=await bucket.download(path);
+  if(!downloadError&&blob){const url=URL.createObjectURL(blob);localShotPreviews.set(path,url);return url}
+  console.error("Image preview failed",error||downloadError);return null
+}
+
+const SCREENSHOT_COMPRESS_THRESHOLD=400*1024;
+const SCREENSHOT_MAX_DIMENSION=2560;
+const SCREENSHOT_WEBP_QUALITY=.85;
+function originalImageMeta(file){
+  const mime=(file.type||"").toLowerCase();
+  const byMime={"image/jpeg":"jpg","image/jpg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","image/avif":"avif","image/heic":"heic","image/heif":"heif","image/bmp":"bmp"};
+  const match=(file.name||"").match(/\.([a-z0-9]{2,5})$/i);
+  return {ext:byMime[mime]||(match?match[1].toLowerCase():"bin"),contentType:mime||"application/octet-stream"};
+}
+function imageFromFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const img=new Image();
+      img.onload=()=>resolve(img);
+      img.onerror=()=>reject(new Error("This image format could not be compressed in your browser."));
+      img.src=reader.result;
+    };
+    reader.onerror=()=>reject(reader.error||new Error("Could not read image."));
+    reader.readAsDataURL(file);
+  });
+}
+async function optimizeScreenshot(file){
+  const original=originalImageMeta(file);
+  if(!file?.type?.startsWith("image/"))throw new Error("Please choose an image file.");
+  if(file.size<SCREENSHOT_COMPRESS_THRESHOLD)return {body:file,...original,optimized:false};
+  const img=await imageFromFile(file);
+  const scale=Math.min(1,SCREENSHOT_MAX_DIMENSION/img.width,SCREENSHOT_MAX_DIMENSION/img.height);
+  const width=Math.max(1,Math.round(img.width*scale));
+  const height=Math.max(1,Math.round(img.height*scale));
+  const canvas=document.createElement("canvas");
+  canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext("2d");
+  if(!ctx)throw new Error("Image compression is unavailable in this browser.");
+  ctx.drawImage(img,0,0,width,height);
+  const webp=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("WebP compression is unavailable in this browser.")),"image/webp",SCREENSHOT_WEBP_QUALITY));
+  // Some older browsers may ignore the requested output type. Never store it as WebP unless it really is WebP.
+  if(webp.type!=="image/webp"||webp.size>=file.size)return {body:file,...original,optimized:false};
+  return {body:webp,ext:"webp",contentType:"image/webp",optimized:true};
+}
+
+async function uploadShot(t,tf,file){
+  if(!activeUser?.id)throw new Error("You must be signed in before uploading images.");
+  let prepared;
+  try{prepared=await optimizeScreenshot(file)}catch(compressError){
+    console.warn("Image compression failed; uploading original file instead.",compressError);
+    const meta=originalImageMeta(file);prepared={body:file,...meta,optimized:false};
+  }
+  const path=`${activeUser.id}/trades/${t.id}/${safe(tf)}-${Date.now()}.${prepared.ext}`;
+  const {error}=await sb.storage.from("journal-images").upload(path,prepared.body,{contentType:prepared.contentType,upsert:false});if(error)throw error;return path;
+}
+async function dash(){
+  let ds;try{ds=await all()}catch(e){console.error(e);$("save").textContent="Load error";return}
+  let ts=ds.flatMap(d=>d.trades.map(t=>({...t,date:d.date}))),w=ts.filter(t=>t.result==="Win").length,l=ts.filter(t=>t.result==="Loss").length,b=ts.filter(t=>t.result==="BE").length,p=ts.reduce((s,t)=>s+(+t.pnl||0),0),res=w+l;
+  $("st").textContent=ts.length;$("wr").textContent=res?Math.round(w/res*100)+"%":"0%";$("np").textContent=cash(p);$("av").textContent=cash(ts.length?p/ts.length:0);$("pt").textContent=ts.length;$("wc").textContent=w;$("lc").textContent=l;$("bc").textContent=b;
+  let total=Math.max(1,w+l+b),a=w/total*360,c=(w+l)/total*360;$("pie").style.background=`conic-gradient(var(--g) 0 ${a}deg,var(--r) ${a}deg ${c}deg,var(--y) ${c}deg 360deg)`;
+  recent(ts);calendar(ds)
+}
+function recent(ts){let h=$("recent");h.innerHTML="";let rows=[...ts].sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||"")).slice(0,8);if(!rows.length){h.innerHTML='<div class="sub">No trades logged yet.</div>';return}rows.forEach(t=>{let e=document.createElement("div");e.className="row";e.innerHTML=`<div>${t.date}</div><div>${t.ticker||"—"}</div><div>${t.session||"—"}</div><div class="${t.result==="Win"?"win":t.result==="Loss"?"loss":"be"}">${t.result||"Open"}</div><div>${t.model||"No model"}</div><b>${cash(t.pnl)}</b>`;e.onclick=()=>openDay(t.date);h.appendChild(e)})}
+function calendar(ds){let y=cur.getFullYear(),m=cur.getMonth();$("ct").textContent=cur.toLocaleDateString(undefined,{month:"long",year:"numeric"});let map=Object.fromEntries(ds.map(d=>[d.date,d.trades])),s=new Date(y,m,1-new Date(y,m,1).getDay()),h=$("cal");h.innerHTML="";for(let i=0;i<42;i++){let d=new Date(s);d.setDate(s.getDate()+i);let k=iso(d),e=document.createElement("button");e.className="day";e.textContent=d.getDate();if(d.getMonth()!=m)e.classList.add("out");if(k===iso(new Date()))e.classList.add("today");if((map[k]||[]).length)e.classList.add("has");e.onclick=()=>openDay(k);h.appendChild(e)}}
+async function openDay(d){sel=d;let q=fromISO(d);cur=new Date(q.getFullYear(),q.getMonth(),1);$("dd").textContent=q.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});document.querySelector(".app").classList.add("hidden");$("drawer").classList.add("open");window.scrollTo(0,0);await render()}
+async function render(){try{currentDay=await get(sel)}catch(e){console.error(e);return}let day=currentDay,h=$("trades");h.innerHTML="";if(!day.trades.length){h.innerHTML='<div class="sub" style="margin-top:16px">No trades yet. Click Add Trade.</div>';return}day.trades.forEach((t,i)=>h.appendChild(card(day,t,i)))}
+function f(n,x){return `<div class="f"><label>${n}</label>${x}</div>`}
+function richField(n,key,value,placeholder){return f(n,richEditorHTML(`rich-${key}-${crypto.randomUUID()}`,placeholder,value).replace('<div id="',`<div data-rich-k="${key}" id="`))}
+function opts(k,a,v){return `<select data-k="${k}">${a.map(x=>`<option ${x===v?"selected":""}>${x}</option>`).join("")}</select>`}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function card(day,t,i){let c=document.createElement("div");c.className="trade";c.innerHTML=`<div class="head"><div class="h">Trade ${i+1}</div><button class="danger del">Delete</button></div>
+<div class="g4">${f("Ticker",`<input data-k="ticker" value="${esc(t.ticker)}">`)}${f("Direction",opts("direction",["Long","Short"],t.direction))}${f("Result",opts("result",["","Win","Loss","BE"],t.result))}${f("Account",opts("account",["Eval","Funded","Live"],t.account))}</div>
+<div class="g4" style="margin-top:9px">${f("Entry",`<input data-k="entry" type="number" step="any" value="${esc(t.entry)}">`)}${f("Stop Loss",`<input data-k="sl" type="number" step="any" value="${esc(t.sl)}">`)}${f("Take Profit",`<input data-k="tp" type="number" step="any" value="${esc(t.tp)}">`)}${f("P&L",`<input data-k="pnl" type="number" step=".01" value="${esc(t.pnl)}">`)}</div>
+<div class="g3" style="margin-top:9px">${f("Session",opts("session",["Asia","London","NY AM","NY Lunch","NY PM","Other"],t.session))}${f("Model (optional)",opts("model",MODELS,t.model))}${f("Custom Model",`<input data-k="customModel" value="${esc(t.customModel||"")}">`)}</div>
+<div class="sep"><div class="h" style="margin-bottom:8px">Confluences</div><div class="tags conf"></div></div>
+<div class="sep"><div class="h" style="margin-bottom:8px">Invalidations / Why Setup Was Invalid</div><div class="tags inv"></div></div>
+<div class="g2 sep">${richField("Psychology","psychology",t.psychology||"","Mindset, emotions, confidence, discipline...")}${richField("Trade Notes","notes",t.notes||"","Execution notes, reasoning, lessons...")}</div>
+<div class="sep"><div class="h" style="margin-bottom:8px">Trade Screenshots</div><div class="shots"></div></div>`;
+  c.querySelectorAll("[data-k]").forEach(e=>e.oninput=()=>{t[e.dataset.k]=e.value;queue(day)});
+  c.querySelectorAll("[data-rich-k]").forEach(e=>wireRichEditor(e,()=>{t[e.dataset.richK]=richValue(e);queue(day)}));
+  tags(c.querySelector(".conf"),CONFS,t.confluences||[],v=>{t.confluences=v;queue(day)});tags(c.querySelector(".inv"),INVS,t.invalidations||[],v=>{t.invalidations=v;queue(day)});shots(c.querySelector(".shots"),day,t);
+  c.querySelector(".del").onclick=async()=>{if(confirm("Delete this trade?")){try{await delTrade(t);day.trades=day.trades.filter(x=>x.id!==t.id);currentDay=day;await dash();await render()}catch(e){console.error(e);$("save").textContent="Delete error"}}};
+  return c
+}
+function tags(h,a,sel,cb){let s=new Set(sel);a.forEach(x=>{let b=document.createElement("button");b.className="tag"+(s.has(x)?" on":"");b.textContent=x;b.onclick=()=>{s.has(x)?s.delete(x):s.add(x);b.classList.toggle("on");cb([...s])};h.appendChild(b)})}
+function queue(day){clearTimeout(timer);$("save").textContent="Saving…";timer=setTimeout(()=>save(day),450)}
+async function shots(h,day,t){
+  for(const tf of TFS){
+    let b=document.createElement("div");b.className="shot";let path=t.charts?.[tf];
+    if(path){
+      const url=await signed(path);
+      if(url){const img=document.createElement("img");img.src=url;img.onclick=()=>window.open(url,"_blank");b.appendChild(img)}
+      else{const msg=document.createElement("label");msg.innerHTML=`<b>${tf}</b><br>Image saved — preview unavailable`;b.appendChild(msg)}
+      const x=document.createElement("button");x.className="x";x.textContent="×";x.onclick=async()=>{await sb.storage.from("journal-images").remove([path]);localShotPreviews.delete(path);delete t.charts[tf];await save(day);await render()};b.appendChild(x)
+    }else{
+      let l=document.createElement("label");l.innerHTML=`<b>${tf}</b><br>Add screenshot<input type="file" accept="image/*">`;
+      l.querySelector("input").onchange=async e=>{
+        let file=e.target.files?.[0];if(!file)return;
+        const instantUrl=URL.createObjectURL(file);
+        const preview=document.createElement("img");preview.src=instantUrl;b.innerHTML="";b.appendChild(preview);
+        try{
+          $("save").textContent="Uploading…";t.charts=t.charts||{};
+          const path=await uploadShot(t,tf,file);localShotPreviews.set(path,instantUrl);t.charts[tf]=path;
+          await save(day);await render();$("save").textContent="Saved";
+        }catch(err){
+          URL.revokeObjectURL(instantUrl);console.error("Image upload failed",err);
+          $("save").textContent=`Image error: ${err?.message||"upload failed"}`;await render();
+        }
+      };
+      b.appendChild(l)
+    }h.appendChild(b)
+  }
+}
+$("prev").onclick=()=>{cur.setMonth(cur.getMonth()-1);dash()};$("next").onclick=()=>{cur.setMonth(cur.getMonth()+1);dash()};$("today").onclick=()=>openDay(iso(new Date()));
+$("close").onclick=()=>{$("drawer").classList.remove("open");document.querySelector(".app").classList.remove("hidden");window.scrollTo(0,0);dash()};
+$("add").onclick=async()=>{if(!currentDay)currentDay=await get(sel);currentDay.trades.push(nt());await save(currentDay);await render()};
+$("quick").onclick=async()=>{await openDay(iso(new Date()));$("add").click()};
+document.getElementById("logoutBtn").onclick=signOut;
+
+let tradesStarted=false;
+async function initTrades(){if(tradesStarted)return;tradesStarted=true;cur=new Date();cur.setDate(1);await dash()}
+(async()=>{const {data:{session}}=await sb.auth.getSession();if(session?.user){showApp(session.user);await initTrades()}else showAuth()})();
+
+</script>
+</body></html>
