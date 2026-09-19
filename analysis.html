@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trading Analysis Journal</title>
+<style>
+  :root{
+    --bg:#0b0d10;
+    --panel:#11151a;
+    --panel2:#161b22;
+    --soft:#1d242d;
+    --line:#26303b;
+    --text:#f2f5f7;
+    --muted:#8f9aa8;
+    --accent:#d7ff64;
+    --accent2:#9be15d;
+    --danger:#ff6b6b;
+    --warn:#ffcc66;
+    --radius:18px;
+    --journalTextSize:15px;
+    --journalHeadingSize:42px;
+    --journalTextColor:#f2f5f7;
+    --journalTextAlign:left;
+    --journalTextWeight:400;
+    --journalTextStyle:normal;
+    --site-font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at top right, rgba(215,255,100,.07), transparent 34%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--site-font);
+  }
+
+  button,input,select,textarea,.rich-editor{font:inherit}
+  button{cursor:pointer}
+
+  .app{
+    max-width:1500px;
+    margin:0 auto;
+    padding:24px;
+  }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:18px;
+  }
+
+  .title-wrap{
+    flex:1;
+  }
+
+  .journal-title{
+    width:100%;
+    max-width:720px;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--text);
+    font-size:clamp(25px,4vw,42px);
+    font-weight:800;
+    letter-spacing:-1.4px;
+    padding:2px 0;
+  }
+
+  .subtitle{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:3px;
+  }
+
+  .save-pill{
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--muted);
+    padding:9px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+    font-size:12px;
+  }
+
+  .save-pill.saved{color:var(--accent); border-color:rgba(215,255,100,.35)}
+
+  .layout{
+    display:grid;
+    grid-template-columns:320px minmax(0,1fr);
+    gap:18px;
+    align-items:start;
+  }
+
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:0 20px 70px rgba(0,0,0,.22);
+  }
+
+  .calendar-card{
+    padding:16px;
+    position:sticky;
+    top:18px;
+  }
+
+  .cal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:14px;
+  }
+
+  .cal-title{
+    font-weight:750;
+    font-size:16px;
+  }
+
+  .icon-btn{
+    width:36px;height:36px;
+    border-radius:11px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--text);
+  }
+
+  .weekdays,.calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+  }
+
+  .weekdays{
+    color:var(--muted);
+    font-size:11px;
+    text-align:center;
+    margin-bottom:7px;
+  }
+
+  .day{
+    aspect-ratio:1/1;
+    border-radius:11px;
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--text);
+    position:relative;
+    display:grid;
+    place-items:center;
+    font-size:12px;
+  }
+
+  .day:hover{background:var(--panel2)}
+  .day.outside{color:#4f5965}
+  .day.today{border-color:#56616e}
+  .day.selected{
+    background:var(--accent);
+    color:#0d1008;
+    font-weight:800;
+  }
+
+  .day.has-entry::after{
+    content:"";
+    width:4px;height:4px;
+    border-radius:50%;
+    background:var(--accent);
+    position:absolute;
+    bottom:4px;
+  }
+  .day.selected.has-entry::after{background:#0d1008}
+
+  .calendar-legend{
+    margin-top:14px;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    color:var(--muted);
+    font-size:11px;
+  }
+
+  .main{
+    padding:18px;
+  }
+
+  .entry-head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 220px;
+    gap:14px;
+    align-items:end;
+    margin-bottom:16px;
+  }
+
+  .date-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .selected-date{
+    font-size:24px;
+    font-weight:800;
+    letter-spacing:-.6px;
+  }
+
+  .date-input{
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--text);
+    border-radius:10px;
+    padding:8px 10px;
+  }
+
+  .field-label{
+    display:block;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:10px;
+    font-weight:750;
+    margin:0 0 7px;
+  }
+
+  select,textarea,input[type="text"],.rich-editor{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--text);
+    border-radius:12px;
+    outline:none;
+  }
+
+  select,input[type="text"]{padding:11px 12px}
+  textarea{
+    padding:13px;
+    resize:vertical;
+    min-height:120px;
+    line-height:1.5;
+  }
+
+  select:focus,textarea:focus,input[type="text"]:focus,.date-input:focus,.rich-editor:focus{
+    border-color:rgba(215,255,100,.55);
+    box-shadow:0 0 0 3px rgba(215,255,100,.07);
+  }
+
+
+  .rich-wrap{width:100%}
+  .rich-toolbar{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+  .rich-toolbar button{width:30px;height:28px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px;padding:0}
+  .rich-toolbar button:hover{border-color:#4a5664;background:var(--soft)}
+  .rich-toolbar span{font-size:10px;color:var(--muted);margin-left:3px}
+  .rich-editor{padding:13px;resize:vertical;min-height:120px;line-height:1.5;overflow:auto;white-space:pre-wrap}
+  .rich-editor:empty:before{content:attr(data-placeholder);color:#6f7b88;pointer-events:none}
+
+  .section{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    border-radius:15px;
+    padding:14px;
+    margin-top:14px;
+  }
+
+  .section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .section-hint{
+    color:var(--muted);
+    font-size:11px;
+    font-weight:500;
+  }
+
+  .bias-grid{
+    display:grid;
+    grid-template-columns:1fr 190px;
+    gap:12px;
+  }
+
+  .segmented{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    width:100%;
+    min-width:0;
+  }
+
+  .seg-btn{
+    border:1px solid var(--line);
+    background:var(--soft);
+    color:var(--muted);
+    padding:10px 5px;
+    min-width:0;
+    width:100%;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .seg-btn.active{
+    color:#0e1209;
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+
+  .chart-toolbar{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+  }
+
+  .tab{
+    border:1px solid var(--line);
+    background:var(--soft);
+    color:var(--muted);
+    border-radius:999px;
+    padding:8px 13px;
+    font-weight:700;
+    font-size:12px;
+  }
+
+  .tab.active{
+    background:var(--accent);
+    color:#0d1008;
+    border-color:var(--accent);
+  }
+
+  .chart-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .upload{
+    min-height:170px;
+    border:1px dashed #394553;
+    background:#101419;
+    border-radius:14px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .upload:hover{border-color:rgba(215,255,100,.48)}
+  .upload input{display:none}
+
+  .upload-label{
+    position:absolute;
+    top:10px;
+    left:10px;
+    z-index:2;
+    padding:5px 8px;
+    border-radius:8px;
+    background:rgba(9,12,15,.78);
+    backdrop-filter:blur(6px);
+    font-size:11px;
+    font-weight:800;
+  }
+
+  .upload-empty{
+    padding:22px;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.45;
+    cursor:pointer;
+  }
+
+  .upload-empty strong{
+    color:var(--text);
+    display:block;
+    margin-bottom:4px;
+  }
+
+  .preview{
+    width:100%;
+    height:100%;
+    min-height:170px;
+    object-fit:cover;
+    display:block;
+    cursor:zoom-in;
+  }
+
+  .remove-img{
+    position:absolute;
+    right:8px;
+    top:8px;
+    z-index:3;
+    width:28px;height:28px;
+    border-radius:9px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.68);
+    color:white;
+  }
+
+  .bottom-grid{
+    display:grid;
+    grid-template-columns:1fr 340px;
+    gap:14px;
+  }
+
+  .setup-box{
+    display:grid;
+    gap:10px;
+  }
+
+  .setup-status{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+  }
+
+  .status-btn{
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--soft);
+    color:var(--muted);
+    font-weight:750;
+    font-size:12px;
+  }
+
+  .status-btn.active[data-value="yes"]{background:var(--accent);color:#0d1008;border-color:var(--accent)}
+  .status-btn.active[data-value="no"]{background:var(--danger);color:white;border-color:var(--danger)}
+  .status-btn.active[data-value="none"]{background:var(--warn);color:#201800;border-color:var(--warn)}
+
+  .footer-row{
+    margin-top:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    color:var(--muted);
+    font-size:11px;
+  }
+
+  .danger-link{
+    border:0;
+    background:transparent;
+    color:#ef7b7b;
+    padding:0;
+  }
+
+  .modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.82);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:26px;
+  }
+  .modal.open{display:flex}
+  .modal img{
+    max-width:95vw;
+    max-height:90vh;
+    border-radius:14px;
+    border:1px solid #303946;
+  }
+
+  @media (max-width:1100px){
+    .layout{grid-template-columns:1fr}
+    .calendar-card{position:static}
+    .chart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+
+  @media (max-width:700px){
+    .app{padding:12px}
+    .topbar{align-items:flex-start}
+    .layout{gap:12px}
+    .main,.calendar-card{padding:12px}
+    .entry-head,.bias-grid,.bottom-grid{grid-template-columns:1fr}
+    .chart-grid{grid-template-columns:1fr}
+    .selected-date{font-size:20px}
+    .upload{min-height:190px}
+  }
+
+.auth-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:radial-gradient(circle at top right,rgba(215,255,100,.08),transparent 32%),var(--bg);
+}
+.auth-card{
+  width:min(440px,100%);background:var(--panel);border:1px solid var(--line);
+  border-radius:20px;padding:24px;box-shadow:0 28px 90px rgba(0,0,0,.35)
+}
+.auth-card h1{margin:0;font-size:30px;letter-spacing:-1px}
+.auth-card p{color:var(--muted);font-size:13px;line-height:1.5}
+.auth-fields{display:grid;gap:10px;margin-top:18px}
+.auth-fields input{
+  width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);
+  border-radius:11px;padding:11px 12px;outline:none
+}
+.auth-actions{display:grid;gap:8px;margin-top:12px}
+.auth-primary{border:0;background:var(--accent);color:#0b0e08;padding:11px;border-radius:11px;font-weight:850}
+.auth-secondary{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px;border-radius:11px;font-weight:750}
+.auth-link{border:0;background:transparent;color:var(--muted);padding:7px}
+.auth-message{min-height:18px;color:var(--muted);font-size:12px;margin-top:10px}
+.auth-message.error{color:#ff8585}.auth-message.ok{color:var(--accent)}
+.user-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.user-label{color:var(--muted);font-size:11px}
+.logout-btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px 10px;border-radius:10px}
+.hidden{display:none!important}
+
+.user-controls #userLabel,.user-controls .logout-btn{display:none!important}
+
+  /* Appearance typography applies to journal writing; B/I/U are per-selection inside rich editors. */
+  #thesis,#notes,#customTicker{font-size:var(--journalTextSize)!important;color:var(--journalTextColor)!important;text-align:var(--journalTextAlign)!important}
+  #journalTitle{font-size:var(--journalHeadingSize)!important;color:var(--journalTextColor)!important;text-align:var(--journalTextAlign)!important}
+</style>
+</head>
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="field-label">Private trading workspace</div>
+    <h1 id="authHeading">Welcome Back, Trader</h1>
+    <p id="authSub">Sign in to open your private journal on this device.</p>
+    <div class="auth-fields">
+      <input id="authName" type="text" placeholder="Display name" class="hidden" autocomplete="name">
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <input id="authNewPassword" type="password" placeholder="New password" class="hidden" autocomplete="new-password">
+    </div>
+    <div class="auth-actions">
+      <button id="authSubmit" class="auth-primary">Sign In</button>
+      <button id="authToggle" class="auth-secondary">Create an account</button>
+      <button id="authForgot" class="auth-link">Forgot password?</button>
+    </div>
+    <div id="authMessage" class="auth-message"></div>
+  </div>
+</div>
+
+<div class="app">
+  <div class="topbar">
+    <div class="title-wrap">
+      <input id="journalTitle" class="journal-title" value="Market Analysis Journal" aria-label="Journal title">
+      <div class="subtitle">Daily pre-market thesis • chart review • setup validation</div>
+    </div>
+    <div class="user-controls"><span id="userLabel" class="user-label"></span><div id="saveStatus" class="save-pill saved">Saved</div><button id="logoutBtn" class="logout-btn">Log out</button></div>
+  </div>
+
+  <div class="layout">
+    <aside class="card calendar-card">
+      <div class="cal-head">
+        <button class="icon-btn" id="prevMonth" aria-label="Previous month">←</button>
+        <div class="cal-title" id="calendarTitle"></div>
+        <button class="icon-btn" id="nextMonth" aria-label="Next month">→</button>
+      </div>
+      <div class="weekdays">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="calendar-legend">
+        <span>• = saved entry</span>
+        <button class="danger-link" id="todayBtn">Jump to today</button>
+      </div>
+    </aside>
+
+    <main class="card main">
+      <div class="entry-head">
+        <div>
+          <div class="field-label">Selected trading day</div>
+          <div class="date-row">
+            <div id="selectedDateText" class="selected-date"></div>
+            <input id="datePicker" class="date-input" type="date">
+          </div>
+        </div>
+        <div>
+          <label class="field-label" for="ticker">Instrument / ticker</label>
+          <select id="ticker">
+            <option value="">Select instrument</option>
+            <option>NQ</option>
+            <option>ES</option>
+            <option>YM</option>
+            <option>RTY</option>
+            <option>SPY</option>
+            <option>QQQ</option>
+            <option>GC</option>
+            <option>MGC</option>
+            <option>CL</option>
+            <option>BTC</option>
+            <option>EURUSD</option>
+            <option value="OTHER">Other / Custom</option>
+          </select>
+          <input id="customTicker" type="text" placeholder="Enter custom ticker" style="display:none;margin-top:7px;">
+        </div>
+      </div>
+
+      <section class="section">
+        <div class="section-title">
+          <span>Daily Speculation / Thesis</span>
+          <span class="section-hint">What do you expect price to do across the full day?</span>
+        </div>
+        <div class="bias-grid">
+          <div id="thesisMount"></div>
+          <div>
+            <div class="field-label">Directional expectation</div>
+            <div class="segmented" id="biasButtons">
+              <button class="seg-btn" data-value="bullish">Bullish</button>
+              <button class="seg-btn" data-value="neutral">Neutral</button>
+              <button class="seg-btn" data-value="bearish">Bearish</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span>Chart Review</span>
+          <span class="section-hint">Upload your view at the start and end of the day.</span>
+        </div>
+        <div class="chart-toolbar">
+          <button class="tab active" data-tab="start">Start of Day</button>
+          <button class="tab" data-tab="end">End of Day</button>
+        </div>
+        <div class="chart-grid" id="chartGrid"></div>
+      </section>
+
+      <div class="bottom-grid">
+        <section class="section">
+          <div class="section-title">
+            <span>Day Notes</span>
+            <span class="section-hint">What mattered, what changed, what did you learn?</span>
+          </div>
+          <div id="notesMount"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
+            <span>Valid Setups?</span>
+            <span class="section-hint">Were there model-valid opportunities?</span>
+          </div>
+          <div class="setup-box">
+            <div class="setup-status" id="setupButtons">
+              <button class="status-btn" data-value="yes">Yes</button>
+              <button class="status-btn" data-value="no">No</button>
+              <button class="status-btn" data-value="none">No Trade Day</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer-row">
+        <span>Entries are synced privately to Supabase.</span>
+        <button id="deleteEntry" class="danger-link">Delete selected day</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="imageModal" class="modal" aria-hidden="true">
+  <img id="modalImage" alt="Expanded chart">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+function applyWorkspaceTheme(p={}){
+  const r=document.documentElement.style;
+  if(p.fontSize!=null)r.setProperty('--journalTextSize',p.fontSize+'px');
+  if(p.headingSize!=null)r.setProperty('--journalHeadingSize',p.headingSize+'px');
+  if(p.textColor)r.setProperty('--journalTextColor',p.textColor);
+  r.setProperty('--journalTextAlign',p.alignment||'left');
+  const fonts={inter:'Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif',arial:'Arial,Helvetica,sans-serif',verdana:'Verdana,Geneva,sans-serif',trebuchet:'"Trebuchet MS",Arial,sans-serif',georgia:'Georgia,"Times New Roman",serif',times:'"Times New Roman",Times,serif',courier:'"Courier New",Courier,monospace'};
+  r.setProperty('--site-font',fonts[p.siteFont]||fonts.inter);
+  /* Journal chrome/colors stay original. */
+}
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='workspace-theme')applyWorkspaceTheme(e.data.prefs||{})});
+try{parent.postMessage({type:'workspace-theme-ready'},location.origin)}catch{}
+
+
+const RICH_ALLOWED=new Set(['B','I','U','STRONG','EM','BR','DIV','P']);
+function sanitizeRichHTML(html){
+  const box=document.createElement('div');box.innerHTML=String(html||'');
+  const clean=node=>{for(const child of [...node.children]){clean(child);if(!RICH_ALLOWED.has(child.tagName)){child.replaceWith(...child.childNodes)}else{[...child.attributes].forEach(a=>child.removeAttribute(a.name))}}};
+  clean(box);return box.innerHTML;
+}
+function richHTMLFromStored(value){const s=String(value||'');if(!/<\/?(?:b|i|u|strong|em|br|div|p)\b/i.test(s)){const d=document.createElement('div');d.textContent=s;return d.innerHTML.replace(/\n/g,'<br>')}return sanitizeRichHTML(s)}
+function richEditorHTML(id,placeholder,value=''){return `<div class="rich-wrap"><div class="rich-toolbar" aria-label="Text formatting"><button type="button" data-rich-cmd="bold" title="Bold selected text"><b>B</b></button><button type="button" data-rich-cmd="italic" title="Italicize selected text"><i>I</i></button><button type="button" data-rich-cmd="underline" title="Underline selected text"><u>U</u></button><span>Select words, then format them.</span></div><div id="${id}" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="${placeholder.replace(/"/g,'&quot;')}">${richHTMLFromStored(value)}</div></div>`}
+function wireRichEditor(editor,onchange){
+  const wrap=editor.closest('.rich-wrap');
+  wrap.querySelectorAll('[data-rich-cmd]').forEach(btn=>{btn.addEventListener('mousedown',e=>e.preventDefault());btn.addEventListener('click',()=>{editor.focus();document.execCommand(btn.dataset.richCmd,false,null);onchange?.()})});
+  editor.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+  editor.addEventListener('input',()=>onchange?.());
+}
+function richValue(editor){if(!editor.textContent.trim())return '';return sanitizeRichHTML(editor.innerHTML).trim()}
+function setRichValue(editor,value){editor.innerHTML=richHTMLFromStored(value)}
+
+const SUPABASE_URL = 'https://fkxciwqjmubaqecljtba.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_mJn9UlaMNB_hk0hpAermdw_ykx54tba';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+});
+let activeUser = null;
+let initializedUserId = null;
+let authMode = "signin";
+
+function authMsg(message, kind=""){
+  const el=document.getElementById("authMessage");
+  el.textContent=message||"";
+  el.className="auth-message"+(kind?(" "+kind):"");
+}
+function setAuthMode(mode){
+  authMode=mode;
+  const signup=mode==="signup", recovery=mode==="recovery";
+  document.getElementById("authHeading").textContent=recovery?"Choose a New Password":signup?"Create Your Journal Account":"Welcome Back, Trader";
+  document.getElementById("authSub").textContent=recovery?"Set a new password for your trading journal.":signup?"Your analysis and trade journals will use the same private account.":"Sign in to open your private journal on this device.";
+  document.getElementById("authName").classList.toggle("hidden",!signup);
+  document.getElementById("authEmail").classList.toggle("hidden",recovery);
+  document.getElementById("authPassword").classList.toggle("hidden",recovery);
+  document.getElementById("authNewPassword").classList.toggle("hidden",!recovery);
+  document.getElementById("authSubmit").textContent=recovery?"Update Password":signup?"Create Account":"Sign In";
+  document.getElementById("authToggle").classList.toggle("hidden",recovery);
+  document.getElementById("authForgot").classList.toggle("hidden",signup||recovery);
+  document.getElementById("authToggle").textContent=signup?"I already have an account":"Create an account";
+  authMsg("");
+}
+function showAuth(){
+  document.getElementById("authScreen").classList.remove("hidden");
+  document.querySelector('.app').classList.add("hidden");
+}
+function showApp(user){
+  activeUser=user;
+  document.getElementById("authScreen").classList.add("hidden");
+  document.querySelector('.app').classList.remove("hidden");
+  const label=document.getElementById("userLabel");
+  if(label) label.textContent=user?.user_metadata?.display_name || user?.email || "Trader";
+}
+async function signOut(){
+  await sb.auth.signOut();
+  resetAnalysisSession();
+  activeUser=null;
+  showAuth();
+}
+document.getElementById("authToggle").addEventListener("click",()=>setAuthMode(authMode==="signup"?"signin":"signup"));
+document.getElementById("authForgot").addEventListener("click",async()=>{
+  const email=document.getElementById("authEmail").value.trim();
+  if(!email) return authMsg("Enter your email first.","error");
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+  if(error) return authMsg(error.message,"error");
+  authMsg("Password reset email sent.","ok");
+});
+document.getElementById("authSubmit").addEventListener("click",async()=>{
+  authMsg("Working…");
+  if(authMode==="recovery"){
+    const password=document.getElementById("authNewPassword").value;
+    if(password.length<6) return authMsg("Use at least 6 characters.","error");
+    const {error}=await sb.auth.updateUser({password});
+    if(error) return authMsg(error.message,"error");
+    authMsg("Password updated. Opening journal…","ok");
+    const {data}=await sb.auth.getUser();
+    showApp(data.user);
+    await initAnalysis();
+    return;
+  }
+  const email=document.getElementById("authEmail").value.trim();
+  const password=document.getElementById("authPassword").value;
+  if(!email||!password) return authMsg("Enter your email and password.","error");
+  if(authMode==="signup"){
+    const name=document.getElementById("authName").value.trim();
+    if(!name) return authMsg("Enter a display name.","error");
+    const {data,error}=await sb.auth.signUp({
+      email,password,
+      options:{data:{display_name:name},emailRedirectTo:location.origin}
+    });
+    if(error) return authMsg(error.message,"error");
+    if(!data.session) return authMsg("Account created. Check your email to confirm it, then sign in.","ok");
+    showApp(data.user); await initAnalysis(); return;
+  }
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error) return authMsg(error.message,"error");
+  showApp(data.user); await initAnalysis();
+});
+sb.auth.onAuthStateChange(async(event,session)=>{
+  if(event==="PASSWORD_RECOVERY"){showAuth();setAuthMode("recovery");return;}
+  if(event==="SIGNED_OUT"){resetAnalysisSession();activeUser=null;showAuth();return;}
+  if(session?.user){
+    const changed=activeUser?.id!==session.user.id;
+    showApp(session.user);
+    if(changed || initializedUserId!==session.user.id) await initAnalysis(true);
+  }
+});
+
+let selectedDate = toISO(new Date());
+let calendarCursor = new Date();
+calendarCursor.setDate(1);
+let currentChartTab = "start";
+let currentEntry = blankEntry();
+let saveTimer = null;
+const TFs = ["Daily","4H","1H","30M","15M","5M","1M"];
+const META_KEY = "marketJournalMeta";
+const $ = id => document.getElementById(id);
+
+function blankEntry(){
+  return {date:selectedDate,ticker:"",customTicker:"",thesis:"",bias:"",notes:"",setupStatus:"",charts:{start:{},end:{}},updatedAt:null};
+}
+function toISO(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`}
+function fromISO(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function formatLong(s){return fromISO(s).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
+function setSaveState(saved,text=null){const el=$("saveStatus");el.textContent=text||(saved?"Saved":"Saving…");el.classList.toggle("saved",saved)}
+function safeName(v){return String(v).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}
+function rowToEntry(row){
+  if(!row) return blankEntry();
+  const instrument=row.instrument||"";
+  const builtins=["NQ","ES","YM","RTY","SPY","QQQ","GC","MGC","CL","BTC","EURUSD"];
+  return {
+    date:row.trade_date,
+    ticker:builtins.includes(instrument)?instrument:(instrument?"OTHER":""),
+    customTicker:builtins.includes(instrument)?"":instrument,
+    thesis:row.thesis||"",
+    bias:row.bias||"",
+    notes:row.notes||"",
+    setupStatus:row.valid_setups||"",
+    charts:{start:row.start_charts||{},end:row.end_charts||{}},
+    updatedAt:row.updated_at
+  };
+}
+function entryToRow(){
+  const instrument=currentEntry.ticker==="OTHER"?currentEntry.customTicker.trim():currentEntry.ticker;
+  return {
+    user_id:activeUser.id,
+    trade_date:selectedDate,
+    title:$("journalTitle").value.trim()||"Market Analysis Journal",
+    instrument:instrument||null,
+    bias:currentEntry.bias||null,
+    thesis:currentEntry.thesis||null,
+    notes:currentEntry.notes||null,
+    valid_setups:currentEntry.setupStatus||null,
+    start_charts:currentEntry.charts?.start||{},
+    end_charts:currentEntry.charts?.end||{},
+    updated_at:new Date().toISOString()
+  };
+}
+async function dbGet(date){
+  const {data,error}=await sb.from("analysis_entries").select("*").eq("user_id",activeUser.id).eq("trade_date",date).maybeSingle();
+  if(error) throw error; return data;
+}
+async function dbDates(){
+  const {data,error}=await sb.from("analysis_entries").select("trade_date").eq("user_id",activeUser.id);
+  if(error) throw error; return (data||[]).map(x=>x.trade_date);
+}
+async function dbSave(){
+  const {error}=await sb.from("analysis_entries").upsert(entryToRow(),{onConflict:"user_id,trade_date"});
+  if(error) throw error;
+}
+async function dbDelete(date){
+  const {error}=await sb.from("analysis_entries").delete().eq("user_id",activeUser.id).eq("trade_date",date);
+  if(error) throw error;
+}
+const localChartPreviews=new Map();
+function clearLocalChartPreviews(){
+  for(const url of localChartPreviews.values()){
+    if(typeof url==="string" && url.startsWith("blob:")){try{URL.revokeObjectURL(url)}catch{}}
+  }
+  localChartPreviews.clear();
+}
+function ownsStoragePath(path){return !!activeUser?.id && typeof path==="string" && path.startsWith(`${activeUser.id}/`)}
+async function signed(path){
+  if(!path || !ownsStoragePath(path)) return null;
+  if(localChartPreviews.has(path)) return localChartPreviews.get(path);
+  const bucket=sb.storage.from("journal-images");
+  const {data,error}=await bucket.createSignedUrl(path,300);
+  if(!error && data?.signedUrl) return data.signedUrl;
+  // Fallback for environments where signed-url creation is blocked but authenticated download is allowed.
+  const {data:blob,error:downloadError}=await bucket.download(path);
+  if(!downloadError && blob){
+    const url=URL.createObjectURL(blob);
+    localChartPreviews.set(path,url);
+    return url;
+  }
+  console.error("Image preview failed",error||downloadError);
+  return null;
+}
+
+const SCREENSHOT_COMPRESS_THRESHOLD=400*1024;
+const SCREENSHOT_MAX_DIMENSION=2560;
+const SCREENSHOT_WEBP_QUALITY=.85;
+function originalImageMeta(file){
+  const mime=(file.type||"").toLowerCase();
+  const byMime={"image/jpeg":"jpg","image/jpg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","image/avif":"avif","image/heic":"heic","image/heif":"heif","image/bmp":"bmp"};
+  const match=(file.name||"").match(/\.([a-z0-9]{2,5})$/i);
+  return {ext:byMime[mime]||(match?match[1].toLowerCase():"bin"),contentType:mime||"application/octet-stream"};
+}
+function imageFromFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const img=new Image();
+      img.onload=()=>resolve(img);
+      img.onerror=()=>reject(new Error("This image format could not be compressed in your browser."));
+      img.src=reader.result;
+    };
+    reader.onerror=()=>reject(reader.error||new Error("Could not read image."));
+    reader.readAsDataURL(file);
+  });
+}
+async function optimizeScreenshot(file){
+  const original=originalImageMeta(file);
+  if(!file?.type?.startsWith("image/"))throw new Error("Please choose an image file.");
+  if(file.size<SCREENSHOT_COMPRESS_THRESHOLD)return {body:file,...original,optimized:false};
+  const img=await imageFromFile(file);
+  const scale=Math.min(1,SCREENSHOT_MAX_DIMENSION/img.width,SCREENSHOT_MAX_DIMENSION/img.height);
+  const width=Math.max(1,Math.round(img.width*scale));
+  const height=Math.max(1,Math.round(img.height*scale));
+  const canvas=document.createElement("canvas");
+  canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext("2d");
+  if(!ctx)throw new Error("Image compression is unavailable in this browser.");
+  ctx.drawImage(img,0,0,width,height);
+  const webp=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("WebP compression is unavailable in this browser.")),"image/webp",SCREENSHOT_WEBP_QUALITY));
+  // Some older browsers may ignore the requested output type. Never store it as WebP unless it really is WebP.
+  if(webp.type!=="image/webp"||webp.size>=file.size)return {body:file,...original,optimized:false};
+  return {body:webp,ext:"webp",contentType:"image/webp",optimized:true};
+}
+
+async function uploadChart(tf,file){
+  if(!activeUser?.id) throw new Error("You must be signed in before uploading images.");
+  let prepared;
+  try{prepared=await optimizeScreenshot(file)}catch(compressError){
+    console.warn("Image compression failed; uploading original file instead.",compressError);
+    const meta=originalImageMeta(file);prepared={body:file,...meta,optimized:false};
+  }
+  const path=`${activeUser.id}/analysis/${selectedDate}/${currentChartTab}-${safeName(tf)}-${Date.now()}.${prepared.ext}`;
+  const {error}=await sb.storage.from("journal-images").upload(path,prepared.body,{contentType:prepared.contentType,upsert:false});
+  if(error) throw error;
+  return path;
+}
+async function removeStoragePath(path){if(!path||!ownsStoragePath(path))return;await sb.storage.from("journal-images").remove([path])}
+
+function scheduleSave(){setSaveState(false);clearTimeout(saveTimer);saveTimer=setTimeout(saveEntry,450)}
+async function saveEntry(){
+  try{
+    readFormIntoEntry();
+    await dbSave();
+    currentEntry.updatedAt=new Date().toISOString();
+    setSaveState(true);
+    await renderCalendar();
+  }catch(e){console.error(e);setSaveState(false,"Save error")}
+}
+function readFormIntoEntry(){
+  currentEntry.date=selectedDate;
+  currentEntry.ticker=$("ticker").value;
+  currentEntry.customTicker=$("customTicker").value.trim();
+  currentEntry.thesis=richValue($("thesis"));
+  currentEntry.notes=richValue($("notes"));
+}
+async function loadEntry(date){
+  selectedDate=date;
+  try{currentEntry=rowToEntry(await dbGet(date))}catch(e){console.error(e);currentEntry=blankEntry();setSaveState(false,"Load error")}
+  currentEntry.date=date;
+  currentEntry.charts=currentEntry.charts||{start:{},end:{}};
+  currentEntry.charts.start=currentEntry.charts.start||{};
+  currentEntry.charts.end=currentEntry.charts.end||{};
+  populateForm();
+  await renderCalendar();
+}
+function populateForm(){
+  $("selectedDateText").textContent=formatLong(selectedDate);
+  $("datePicker").value=selectedDate;
+  $("ticker").value=currentEntry.ticker||"";
+  $("customTicker").value=currentEntry.customTicker||"";
+  $("customTicker").style.display=currentEntry.ticker==="OTHER"?"block":"none";
+  setRichValue($("thesis"),currentEntry.thesis||"");
+  setRichValue($("notes"),currentEntry.notes||"");
+  setActiveButtons("biasButtons",currentEntry.bias);
+  setActiveButtons("setupButtons",currentEntry.setupStatus);
+  renderChartGrid();
+}
+function setActiveButtons(containerId,value){document.querySelectorAll(`#${containerId} button`).forEach(b=>b.classList.toggle("active",b.dataset.value===value))}
+function selectDate(date){const d=fromISO(date);calendarCursor=new Date(d.getFullYear(),d.getMonth(),1);loadEntry(date)}
+async function renderCalendar(){
+  const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
+  $("calendarTitle").textContent=calendarCursor.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  const start=new Date(y,m,1-new Date(y,m,1).getDay());
+  let keys=new Set();try{keys=new Set(await dbDates())}catch(e){console.warn(e)}
+  const today=toISO(new Date()),grid=$("calendarGrid");grid.innerHTML="";
+  for(let i=0;i<42;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);const key=toISO(d),btn=document.createElement("button");
+    btn.className="day";if(d.getMonth()!==m)btn.classList.add("outside");if(key===today)btn.classList.add("today");
+    if(key===selectedDate)btn.classList.add("selected");if(keys.has(key))btn.classList.add("has-entry");
+    btn.textContent=d.getDate();btn.onclick=()=>selectDate(key);grid.appendChild(btn);
+  }
+}
+async function renderChartGrid(){
+  const grid=$("chartGrid");grid.innerHTML="";
+  for(const tf of TFs){
+    const box=document.createElement("div");box.className="upload";
+    const lab=document.createElement("div");lab.className="upload-label";lab.textContent=tf;box.appendChild(lab);
+    const path=currentEntry.charts?.[currentChartTab]?.[tf];
+    if(path){
+      const url=await signed(path);
+      if(url){
+        const img=document.createElement("img");img.className="preview";img.src=url;img.alt=`${tf} chart`;img.onclick=()=>openImage(url);box.appendChild(img);
+      }else{
+        const msg=document.createElement("div");msg.className="upload-empty";msg.innerHTML="<strong>Image saved</strong>Preview unavailable — check journal-images SELECT policy";box.appendChild(msg);
+      }
+      const rm=document.createElement("button");rm.className="remove-img";rm.textContent="×";rm.title="Remove image";
+      rm.onclick=async e=>{e.stopPropagation();await removeStoragePath(path);delete currentEntry.charts[currentChartTab][tf];await saveEntry();renderChartGrid()};
+      box.appendChild(rm);
+    }else{
+      const empty=document.createElement("label");empty.className="upload-empty";empty.innerHTML=`<strong>Add ${tf} chart</strong>Click or drop a screenshot`;
+      const input=document.createElement("input");input.type="file";input.accept="image/*";
+      input.onchange=async e=>{const file=e.target.files?.[0];if(file)await storeChart(tf,file)};
+      empty.appendChild(input);box.appendChild(empty);
+      ["dragenter","dragover"].forEach(evt=>box.addEventListener(evt,e=>{e.preventDefault();box.style.borderColor="rgba(215,255,100,.75)"}));
+      ["dragleave","drop"].forEach(evt=>box.addEventListener(evt,e=>{e.preventDefault();box.style.borderColor=""}));
+      box.addEventListener("drop",async e=>{const file=e.dataTransfer.files?.[0];if(file?.type.startsWith("image/"))await storeChart(tf,file)});
+    }
+    grid.appendChild(box);
+  }
+}
+async function storeChart(tf,file){
+  const instantUrl=URL.createObjectURL(file);
+  try{
+    setSaveState(false,"Uploading image…");
+    const path=await uploadChart(tf,file);
+    // Keep the selected image visible immediately while the private-storage URL is being prepared.
+    localChartPreviews.set(path,instantUrl);
+    currentEntry.charts[currentChartTab][tf]=path;
+    await saveEntry();
+    await renderChartGrid();
+    setSaveState(true);
+  }catch(e){
+    URL.revokeObjectURL(instantUrl);
+    console.error("Image upload failed",e);
+    setSaveState(false,`Image error: ${e?.message||"upload failed"}`);
+  }
+}
+function openImage(src){$("modalImage").src=src;$("imageModal").classList.add("open");$("imageModal").setAttribute("aria-hidden","false")}
+function saveMeta(){localStorage.setItem(META_KEY,JSON.stringify({title:$("journalTitle").value}))}
+function loadMeta(){try{const meta=JSON.parse(localStorage.getItem(META_KEY)||"{}");if(meta.title)$("journalTitle").value=meta.title}catch{}}
+
+$("prevMonth").onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar()};
+$("nextMonth").onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar()};
+$("todayBtn").onclick=()=>selectDate(toISO(new Date()));
+$("datePicker").onchange=e=>{if(e.target.value)selectDate(e.target.value)};
+$("ticker").onchange=e=>{$("customTicker").style.display=e.target.value==="OTHER"?"block":"none";scheduleSave()};
+$("thesisMount").innerHTML=richEditorHTML("thesis","Example: Expecting an early sell-side sweep, displacement higher into HTF liquidity, then possible reversal during NY PM...");
+$("notesMount").innerHTML=richEditorHTML("notes","Market conditions, session behavior, execution notes, what you noticed, what you would do differently...");
+wireRichEditor($("thesis"),scheduleSave);wireRichEditor($("notes"),scheduleSave);
+$("customTicker").addEventListener("input",scheduleSave);
+$("biasButtons").onclick=e=>{if(!e.target.matches("button"))return;currentEntry.bias=e.target.dataset.value;setActiveButtons("biasButtons",currentEntry.bias);scheduleSave()};
+$("setupButtons").onclick=e=>{if(!e.target.matches("button"))return;currentEntry.setupStatus=e.target.dataset.value;setActiveButtons("setupButtons",currentEntry.setupStatus);scheduleSave()};
+document.querySelectorAll(".tab").forEach(tab=>tab.onclick=()=>{currentChartTab=tab.dataset.tab;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===tab));renderChartGrid()});
+$("journalTitle").oninput=()=>{saveMeta();scheduleSave()};
+$("deleteEntry").onclick=async()=>{
+  if(!confirm(`Delete the journal entry for ${formatLong(selectedDate)}?`))return;
+  try{
+    const paths=[...Object.values(currentEntry.charts?.start||{}),...Object.values(currentEntry.charts?.end||{})].filter(Boolean);
+    if(paths.length)await sb.storage.from("journal-images").remove(paths);
+    await dbDelete(selectedDate);currentEntry=blankEntry();populateForm();await renderCalendar();
+  }catch(e){console.error(e);setSaveState(false,"Delete error")}
+};
+$("imageModal").onclick=()=>{$("imageModal").classList.remove("open");$("imageModal").setAttribute("aria-hidden","true")};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("imageModal").classList.remove("open")});
+document.getElementById("logoutBtn").onclick=signOut;
+
+function resetAnalysisSession(){
+  clearTimeout(saveTimer);
+  saveTimer=null;
+  clearLocalChartPreviews();
+  initializedUserId=null;
+  selectedDate=toISO(new Date());
+  calendarCursor=new Date();calendarCursor.setDate(1);
+  currentChartTab="start";
+  currentEntry=blankEntry();
+  const modal=$("imageModal");if(modal){modal.classList.remove("open");modal.setAttribute("aria-hidden","true")}
+  const modalImg=$("modalImage");if(modalImg)modalImg.removeAttribute("src");
+  if($("chartGrid")) $("chartGrid").innerHTML="";
+}
+async function initAnalysis(force=false){
+  if(!activeUser?.id)return;
+  if(!force && initializedUserId===activeUser.id)return;
+  if(initializedUserId && initializedUserId!==activeUser.id) clearLocalChartPreviews();
+  initializedUserId=activeUser.id;
+  selectedDate=toISO(new Date());
+  calendarCursor=new Date();calendarCursor.setDate(1);
+  currentChartTab="start";
+  currentEntry=blankEntry();
+  loadMeta();
+  await loadEntry(selectedDate);
+}
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user){showApp(session.user);await initAnalysis()}else showAuth();
+})();
+
+</script>
+</body>
+</html>
